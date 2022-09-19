@@ -317,7 +317,8 @@ Allow us to review your contribution\
 Repository Structure
 
 ├── README.md <- The README for reviewers of this project\
-├── 01-Data_Cleaning.ipynb <- Documentation of the analysis process in Jupyter notebook\
-├── 02-EDA_and_Regression_Model <- The presentation in PDF\
-├── Data <- Both sourced externally and generated from code\
-└── image <- Storage for all images used\
+├── Notebook.ipynb <- Documentation of the analysis process in Jupyter notebook\
+├── working_notebook.ipynb <- EDA Draft notebook\
+├── Twitter_Sentiment_Analysis.pptx <- The presentation in PDF\
+├── data <- Both sourced externally and generated from code\
+└── images <- Storage for all images used\
