@@ -62,7 +62,7 @@ Process_String Function
                   "",
                   str(text))
     
-    # Remove prediods  marks
+    # Remove periods  marks
     text = re.sub(r"[\.]*",
                   "",
                   str(text))
@@ -140,25 +140,165 @@ plt.axis("off")
 
 Our prediction model performed fairly well and was built off on XYZ algorithm.
 The following hyper-parameters that the model used were...
-1.
-2.
-3.
+1. estimator__C = 1.0
+2. estimator__solver = l2 
+3. estimator__penalty = newton-cg
 The following scores that the model generated were...
-Accuracy Score:
-Recall Score:
-Precision Score:
-F1 Score:
-Below is a confusion matrix which demonstrates the spread of the predictions.
-[Input Confusion Matrix.png]
+Accuracy Score: 89.62%
+Recall Score: 89%
+Precision Score: 88%
+F1 Score: 88%
+Below is a dummy confusion matrix which demonstrates the spread of the predictions.
+
+![Confusion_Matrix](/images/Confusion_Matrix_Dummy.png)
+
+Below is our final models confusion matrix which demonstrates the spread of the predictions.
+
+![Confusion_Matrix](/images/Confusion_Matrix_LogReg.png)
+
 In terms of the Word Clouds that were generated afterwards, this is one sample for Apple.
 Below are the WordClouds for Positive and Negative Sentiment. The shape was have chosen was a bird since the text is based off Twitter and should be overall appealing for the consumer.
-[Input WordCloud Birds.pngs]
 
+![Apple_Cloud](/images/apple_tweet_cloud.png)
+![Apple_Cloud](/images/apple_google_top_words.png)
+
+Below is just the overall benchmark models performance comparison between each other. We can see that Logistic Regression has performed the best amongst them.
+
+![Apple_Cloud](/images/benchmark_models_performance.png)
 
 ### Recommendations
 
 Our recommendation for what should be done with the data is that our prediction model and word clouds can be used to track overall sentiment. The data that has to be fed is just new tweets and those could be put into a time-series. Our model can predict the sentiment to a X accuracy and that can be used to track the overall trend of how people are viewing the company or product. It is up to the user on how they want to tackle the sentiment whether it is on an up-trend or down-trend. The purpose of the WordCloud is to see which words are generally associated with the positive and negative sentiments. For example, if iPhone was seen in the WordCloud for negative sentiment; it would be highly recommended to analyze any issues ongoing with the iPhone and why people may be viewing the iPhone in an unfavorable manner. 
 Essentially, we cannot provide specific recommendations to the client as our model just displays the sentiment and top words associated with each sentiment and it is up to the client on how they want to deal with their trending sentiments on their company or product.
+
+### User Based Searching
+
+Below is a Function that'll output bar graphs and word clouds based off a user input list and a dataset.
+This is so that the project is not specific to any dataset or Google/Apple focused only. This allows the user to search for any keywords that they may deem interesting. For example, if the user has an interest in seeing the public sentiment on monkeys; they can assign a dataframe of tweets with an user input of different monkeys. From there, the function will print out infographics focusing on tweets relevant to the key words of the monkeys they were seeking.
+
+```userinput = input("Enter a list of words:")
+userinput = userinput.split()
+print(userinput)
+dftest = pd.read_csv('./data/judge-1377884607_tweet_product_company.csv',
+                 encoding="ISO-8859-1")
+def customsearch(userinput, dataframe):
+    def process_string(text):
+        text = re.sub('@[^\s]+',
+                      '',
+                      str(text))
+        text = re.sub(r'https:\/\/.*[\r\n]*',
+                      "",
+                      str(text))
+        text = re.sub(r'www\.\w*\.\w\w\w',
+                      "",
+                      str(text))
+        text = re.sub(r"<[\w]*[\s]*/>",
+                      "",
+                      str(text))
+        text = re.sub(r"[\.]*",
+                      "",
+                      str(text))
+        pattern = "([a-zA-Z]+(?:'[a-z]+)?)"
+        tokenizer = RegexpTokenizer(pattern)
+        text_tokens = tokenizer.tokenize(text.lower())
+        lemmatizer  = WordNetLemmatizer()
+        english_stopwords = stopwords.words("english")
+        new_list = ['mention', 'sxsw', 'sxswi', 'link', 'rt', 'quot', 'g']
+        english_stopwords.extend(new_list)
+        cleaned_text_tokens = [] # A list to hold cleaned text tokens
+        for word in text_tokens:
+            if((word not in english_stopwords) and # Remove stopwords
+                (word not in string.punctuation)): # Remove punctuation marks          
+                    lemmas = lemmatizer.lemmatize(word) # Get lemma of the current word
+                    cleaned_text_tokens.append(lemmas) # Appened lemma word to list of cleaned list
+        clean_text = " ".join(cleaned_text_tokens)
+        return clean_text
+    dataframe['tweet_text'] = dataframe['tweet_text'].apply(process_string)
+    def variable_sorter(x):
+        for i in userinput:
+            if i.lower() in x.lower():
+                return 'yessir'
+            else:
+                continue
+    dataframe['Variable'] = dataframe['tweet_text'].apply(variable_sorter)
+    dataframe['processed_text'] = dataframe['tweet_text'].str.split()
+    dataframe.drop('emotion_in_tweet_is_directed_at', axis=1, inplace=True)
+    dataframe = dataframe[dataframe['Variable'] == "yessir"]
+    dataframe.drop('Variable', axis=1, inplace=True)
+    dataframe.rename(columns={'tweet_text':'Text', 'is_there_an_emotion_directed_at_a_brand_or_product' : 'Sentiment'}, inplace=True)
+    dataframe = dataframe[dataframe['Sentiment'] != "I can't tell"]
+    dataframe = dataframe[dataframe['Sentiment'] != "No emotion toward brand or product"]
+    fig, axes = plt.subplots(nrows=2, figsize=(14, 14))
+    plotted_words_and_colors = {}
+    color_palette = sns.color_palette('viridis', n_colors=44)
+    # Creating a plot for each unique genre
+    data_by_emotion = [y for _, y in dataframe.groupby('Sentiment', as_index=False)]
+    for index, emotion_df in enumerate(data_by_emotion):
+        all_words_in_emotion = emotion_df.processed_text.explode()
+        top_10 = all_words_in_emotion.value_counts()[:10]
+        colors = []
+        for word in top_10.index:
+            if word not in plotted_words_and_colors:
+                new_color = color_palette.pop(0)
+                plotted_words_and_colors[word] = new_color
+            colors.append(plotted_words_and_colors[word])
+        ax = axes[index]
+        ax.bar(top_10.index, top_10.values, color=colors)
+        ax.set_title(emotion_df.iloc[0].Sentiment.title())
+    fig.tight_layout()
+    plt.savefig('images/apple_positive_negative_top');
+    sns.set(font_scale=1)
+    #plt.savefig('images/apple_google_top_words.png');
+    twitter_mask = np.array(Image.open("./images/twitter_mask.png"))
+    english_stopwords = stopwords.words("english")
+    new_list = ["mention", "sxsw", 'link', 'rt', 'quot']
+    english_stopwords.extend(new_list)
+    positive = dataframe[dataframe.Sentiment == 'Positive emotion']
+    positive_corpus = positive.Text.to_list()
+    positive_corpus = ",".join(positive_corpus)
+    positive_tokens = word_tokenize(positive_corpus)
+    positive_stopped = [token.lower() for token in positive_tokens if token.lower() not in english_stopwords]
+    wordcloud = WordCloud(stopwords=english_stopwords,
+                          collocations=False, 
+                          mask=twitter_mask, 
+                          background_color='white', 
+                          width=1800,
+                          height=1400, 
+                          contour_color='green', 
+                          contour_width=2)
+    wordcloud.generate(','.join(positive_stopped))
+    plt.figure(figsize=(14, 14), 
+               facecolor=None)
+    plt.imshow(wordcloud, 
+               interpolation='bilinear')
+    plt.title('Positive Tweet Cloud', 
+              size=20)
+    plt.axis("off")
+    plt.savefig('images/apple_positive_tweet_cloud');
+    negative = dataframe[dataframe.Sentiment == 'Negative emotion']
+    negative_corpus = negative.Text.to_list()
+    negative_corpus = ",".join(negative_corpus)
+    negative_tokens = word_tokenize(negative_corpus)
+    negative_stopped = [token.lower() for token in negative_tokens if token.lower() not in english_stopwords]
+    wordcloud = WordCloud(stopwords=english_stopwords,
+                          collocations=False, 
+                          mask=twitter_mask, 
+                          background_color='white', 
+                          width=1800,
+                          height=1400, 
+                          contour_color='green', 
+                          contour_width=2)
+    wordcloud.generate(','.join(negative_stopped))
+    plt.figure(figsize=(14, 14), 
+               facecolor=None)
+    plt.imshow(wordcloud, 
+               interpolation='bilinear')
+    plt.title('Negative Tweet Cloud', 
+              size=20)
+    plt.axis("off")
+    plt.savefig('images/apple_negative_tweet_cloud');
+customsearch(userinput, dftest)
+```
 
 
 ### Wanting to contribute?
