@@ -62,7 +62,7 @@ Process_String Function
                   "",
                   str(text))
     
-    # Remove prediods  marks
+    # Remove periods  marks
     text = re.sub(r"[\.]*",
                   "",
                   str(text))
@@ -140,26 +140,31 @@ plt.axis("off")
 
 Our prediction model performed fairly well and was built off on XYZ algorithm.
 The following hyper-parameters that the model used were...
-1.
-2.
-3.
+1. estimator__C = 1.0
+2. estimator__solver = l2 
+3. estimator__penalty = newton-cg
 The following scores that the model generated were...
-Accuracy Score:
-Recall Score:
-Precision Score:
-F1 Score:
-Below is a confusion matrix which demonstrates the spread of the predictions.
-[Input Confusion Matrix.png]
+Accuracy Score: 89.62%
+Recall Score: 89%
+Precision Score: 88%
+F1 Score: 88%
+Below is a dummy confusion matrix which demonstrates the spread of the predictions.
+![Confusion_Matrix](/images/Confusion_Matrix_Dummy.png)
+Below is our final models confusion matrix which demonstrates the spread of the predictions.
+![Confusion_Matrix](/images/Confusion_Matrix_LogReg.png)
 In terms of the Word Clouds that were generated afterwards, this is one sample for Apple.
 Below are the WordClouds for Positive and Negative Sentiment. The shape was have chosen was a bird since the text is based off Twitter and should be overall appealing for the consumer.
-[Input WordCloud Birds.pngs]
-
+![Apple_Cloud](/images/apple_tweet_cloud.png)
+![Apple_Cloud](/images/apple_google_top_words.png)
+Below is just the overall benchmark models performance comparison between each other. We can see that Logistic Regression has performed the best amongst them.
+![Apple_Cloud](/images/benchmark_models_performance.png)
 
 ### Recommendations
 
 Our recommendation for what should be done with the data is that our prediction model and word clouds can be used to track overall sentiment. The data that has to be fed is just new tweets and those could be put into a time-series. Our model can predict the sentiment to a X accuracy and that can be used to track the overall trend of how people are viewing the company or product. It is up to the user on how they want to tackle the sentiment whether it is on an up-trend or down-trend. The purpose of the WordCloud is to see which words are generally associated with the positive and negative sentiments. For example, if iPhone was seen in the WordCloud for negative sentiment; it would be highly recommended to analyze any issues ongoing with the iPhone and why people may be viewing the iPhone in an unfavorable manner. 
 Essentially, we cannot provide specific recommendations to the client as our model just displays the sentiment and top words associated with each sentiment and it is up to the client on how they want to deal with their trending sentiments on their company or product.
 
+### User Based Searching
 
 ### Wanting to contribute?
 
