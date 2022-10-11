@@ -1,4 +1,4 @@
-# Flatiron Phase 4 Project - Twitter Sentiment Analysis
+# Twitter Sentiment Analysis
 ~Benjamin Bai, Alvaro Mendizabal, Charles Pan
 
 
